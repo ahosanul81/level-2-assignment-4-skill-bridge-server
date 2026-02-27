@@ -36,7 +36,7 @@ const updateBookingStatus = catchAsync(async (req, res, next) => {
       req.params.bookingId as string,
       req.body.status as BookingStatus,
     );
-    console.log(result);
+
     sendResponse(res, {
       statusCode: 200,
       success: true,

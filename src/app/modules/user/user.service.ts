@@ -3,7 +3,9 @@ import { prisma } from "../../../lib/prisma";
 import { auth } from "../../../lib/auth";
 import { Admin, Student, Tutor } from "../../../../generated/prisma/browser";
 import { isExistUser } from "./user.utils";
-
+import { AppError } from "../../middelware/AppError";
+import jwt, { Secret } from "jsonwebtoken";
+import config from "../../../config";
 const getSpecificUserFromDB = async (userId: string) => {
   const user = await isExistUser(userId);
 
@@ -51,15 +53,9 @@ const createUserIntoDB = async (payload: {
 
   let userId: string | null = null;
   try {
-    const user = await auth.api.signUpEmail({
-      body: {
-        name,
-        email,
-        password,
-        role,
-      },
-    });
-    userId = user.user.id;
+    const user = await prisma.user.create({ data: payload });
+
+    userId = user.id;
     await prisma.user.update({
       where: { id: userId },
       data: { emailVerified: true },
@@ -93,13 +89,35 @@ const createUserIntoDB = async (payload: {
     throw error;
   }
 };
+const loginUserIntoDB = async (payload: {
+  email: string;
+  password: string;
+}) => {
+  const { email, password } = payload;
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user) {
+    throw new AppError(404, "User not found");
+  }
+  if (user.password !== password) {
+    throw new AppError(404, "Password doesn't match");
+  }
+  const accessToken = jwt.sign(
+    { email, role: user.role },
+    config.jwt.access_token_secret as string,
+    {
+      expiresIn: config.jwt
+        .access_token_expires_in as jwt.SignOptions["expiresIn"],
+    },
+  );
+  return { accessToken };
+};
 
 const updateUserIntoDB = async (
   userId: string,
   payload: Tutor | Student | Admin,
 ) => {
+  console.log(payload);
   const user = await isExistUser(userId);
-
   switch (user.role) {
     case UserRole.STUDENT:
       const student = await prisma.student.update({
@@ -122,9 +140,28 @@ const updateUserIntoDB = async (
       return admin;
   }
 };
+const getMeFromDB = async (email: string) => {
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user) {
+    throw new AppError(404, "User not found");
+  }
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    emailVerified: user.emailVerified,
+    image: user.image,
+    role: user.role,
+    status: user.status,
+    isActive: user.isActive,
+  };
+};
 
 export const userService = {
   getSpecificUserFromDB,
   createUserIntoDB,
+  loginUserIntoDB,
+
   updateUserIntoDB,
+  getMeFromDB,
 };

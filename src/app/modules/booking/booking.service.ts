@@ -26,7 +26,18 @@ const bookingSessionIntoDB = async (
   payload: Pick<Booking, "studentId" | "categoryId" | "tutorId" | "slotId">,
 ) => {
   const { studentId, categoryId, slotId, tutorId } = payload;
-  console.log(payload);
+  // console.log(payload);
+  const existingBooking = await prisma.booking.findFirst({
+    where: {
+      studentId,
+      tutorId,
+      slotId,
+    },
+  });
+
+  if (existingBooking) {
+    throw new AppError(400, "You have already booked");
+  }
   await isExistStudentByUserId(studentId);
   await isExistCategory(categoryId);
   await isExistTutor(tutorId);
