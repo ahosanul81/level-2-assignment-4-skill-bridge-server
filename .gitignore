@@ -3,5 +3,5 @@ node_modules
 .env
 
 /generated/prisma
-
+.env.production
 .vercel
