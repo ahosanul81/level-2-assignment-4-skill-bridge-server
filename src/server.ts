@@ -9,9 +9,9 @@ async function main() {
   try {
     await prisma.$connect();
     console.log("connected to the databse successfully");
-    app.listen(port, () => {
-      console.log(`Skill Bridge server is running on ${port}`);
-    });
+    // app.listen(port, () => {
+    //   console.log(`Skill Bridge server is running on ${port}`);
+    // });
   } catch (error) {
     console.log("An error occured");
     await prisma.$disconnect();
