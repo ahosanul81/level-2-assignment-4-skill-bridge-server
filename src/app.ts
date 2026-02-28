@@ -19,7 +19,7 @@ app.use(cookieParser());
 
 app.use(
   cors({
-    origin: [config.common.client_app_url || "http://localhost:3000"],
+    origin: [config.common.client_app_url as string, "http://localhost:3000"],
     credentials: true,
   }),
 );
