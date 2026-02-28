@@ -21,11 +21,18 @@ const getSpecificUser = catchAsync(async (req, res, next) => {
 const createUser = catchAsync(async (req, res, next) => {
   try {
     const result = await userService.createUserIntoDB(req.body);
-    sendResponse(res, {
-      statusCode: 200,
+
+    res.cookie("accessToken", result?.accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      maxAge: 1000 * 60 * 60 * 24 * 180,
+      path: "/",
+    });
+
+    return res.status(200).json({
       success: true,
       message: "User created succesfully",
-      data: result,
     });
   } catch (error) {
     next(error);
@@ -34,9 +41,9 @@ const createUser = catchAsync(async (req, res, next) => {
 const loginUser = catchAsync(async (req, res, next) => {
   try {
     const result = await userService.loginUserIntoDB(req.body);
-    const { accessToken } = result;
+    // const { accessToken } = result;
 
-    res.cookie("accessToken", accessToken, {
+    res.cookie("accessToken", result?.accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",

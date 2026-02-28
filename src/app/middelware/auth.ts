@@ -21,8 +21,9 @@ declare global {
 export const auth = (...roles: UserRole[]) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
-      // console.log(req.headers.cookie);
-      const token = req.headers.cookie?.split("=")[1].split(";")[0];
+      // console.log(req.headers);
+      // const token = req.headers.cookie?.split("=")[1].split(";")[0];
+      const token = req.cookies.accessToken;
       // const token = req.cookies?.accessToken;
       // if (!token) {
       //   throw new AppError(404, "Token not found");

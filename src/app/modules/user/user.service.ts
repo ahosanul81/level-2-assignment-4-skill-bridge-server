@@ -78,8 +78,21 @@ const createUserIntoDB = async (payload: {
         });
         break;
     }
+    if (user.id) {
+      if (!config.jwt.access_token_secret) {
+        return;
+      }
+      const accessToken = jwt.sign(
+        { email, role: user.role },
+        config.jwt.access_token_secret as string,
+        {
+          expiresIn: config.jwt
+            .access_token_expires_in as jwt.SignOptions["expiresIn"],
+        },
+      );
 
-    return user;
+      return { accessToken };
+    }
   } catch (error) {
     if (userId) {
       await prisma.user.delete({
@@ -98,8 +111,13 @@ const loginUserIntoDB = async (payload: {
   if (!user) {
     throw new AppError(404, "User not found");
   }
+
   if (user.password !== password) {
     throw new AppError(404, "Password doesn't match");
+  }
+
+  if (!config.jwt.access_token_secret) {
+    return;
   }
   const accessToken = jwt.sign(
     { email, role: user.role },
@@ -109,6 +127,7 @@ const loginUserIntoDB = async (payload: {
         .access_token_expires_in as jwt.SignOptions["expiresIn"],
     },
   );
+
   return { accessToken };
 };
 
@@ -116,7 +135,7 @@ const updateUserIntoDB = async (
   userId: string,
   payload: Tutor | Student | Admin,
 ) => {
-  console.log(payload);
+  // console.log(payload);
   const user = await isExistUser(userId);
   switch (user.role) {
     case UserRole.STUDENT:
@@ -141,6 +160,7 @@ const updateUserIntoDB = async (
   }
 };
 const getMeFromDB = async (email: string) => {
+  // console.log(email);
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user) {
     throw new AppError(404, "User not found");
@@ -161,7 +181,6 @@ export const userService = {
   getSpecificUserFromDB,
   createUserIntoDB,
   loginUserIntoDB,
-
   updateUserIntoDB,
   getMeFromDB,
 };
