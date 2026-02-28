@@ -17,9 +17,20 @@ const app: Application = express();
 app.use(express.json());
 app.use(cookieParser());
 
+const allowedOrigins = [config.common.client_app_url, "http://localhost:3000"];
+
 app.use(
   cors({
-    origin: [config.common.client_app_url as string, "http://localhost:3000"],
+    origin: function (origin, callback) {
+      // allow requests with no origin (like Postman, mobile apps)
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
   }),
 );
