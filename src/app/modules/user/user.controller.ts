@@ -43,14 +43,20 @@ const loginUser = catchAsync(async (req, res, next) => {
     const result = await userService.loginUserIntoDB(req.body);
     // const { accessToken } = result;
 
+    // res.cookie("accessToken", result?.accessToken, {
+    //   httpOnly: true,
+    //   secure: process.env.NODE_ENV === "production",
+    //   sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    //   maxAge: 1000 * 60 * 60 * 24 * 180,
+    //   path: "/",
+    // });
     res.cookie("accessToken", result?.accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      secure: true, // REQUIRED for HTTPS
+      sameSite: "none", // REQUIRED for cross-domain
       maxAge: 1000 * 60 * 60 * 24 * 180,
       path: "/",
     });
-
     return res.status(200).json({
       success: true,
       message: "Logged in successfully",
