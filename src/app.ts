@@ -21,16 +21,7 @@ const allowedOrigins = [config.common.client_app_url, "http://localhost:3000"];
 
 app.use(
   cors({
-    origin: function (origin, callback) {
-      // allow requests with no origin (like Postman, mobile apps)
-      if (!origin) return callback(null, true);
-
-      if (allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
+    origin: "https://skill-bridge-eight-khaki.vercel.app",
     credentials: true,
   }),
 );
