@@ -31,14 +31,15 @@ const createUser = catchAsync(async (req, res, next) => {
     // });
     res.cookie("accessToken", result?.accessToken, {
       httpOnly: true,
-      secure: true, // REQUIRED for HTTPS
-      sameSite: "none", // REQUIRED for cross-domain
+      secure: true,
+      sameSite: "none",
       maxAge: 1000 * 60 * 60 * 24 * 180,
       path: "/",
     });
     return res.status(200).json({
       success: true,
       message: "User created succesfully",
+      data: result?.accessToken,
     });
   } catch (error) {
     next(error);

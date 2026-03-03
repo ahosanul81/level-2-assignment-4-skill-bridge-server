@@ -135,7 +135,7 @@ const updateUserIntoDB = async (
   userId: string,
   payload: Tutor | Student | Admin,
 ) => {
-  // console.log(payload);
+  console.log(payload);
   const user = await isExistUser(userId);
   switch (user.role) {
     case UserRole.STUDENT:
